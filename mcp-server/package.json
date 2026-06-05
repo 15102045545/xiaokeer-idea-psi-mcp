@@ -1,0 +1,24 @@
+{
+  "name": "xiaokeer-idea-psi-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Codex MCP server for the local IntelliJ IDEA PSI harness",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "cli": "tsx src/cli.ts",
+    "mcp": "tsx src/mcp.ts",
+    "mcp:smoke": "tsx src/mcp-smoke.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
+

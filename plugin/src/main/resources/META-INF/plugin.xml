@@ -1,0 +1,14 @@
+<idea-plugin>
+  <id>com.xiaokeer.idea.psi.mcp</id>
+  <name>Xiaokeer IDEA PSI MCP</name>
+  <vendor>Xiaokeer</vendor>
+
+  <depends>com.intellij.modules.platform</depends>
+  <depends>JavaScript</depends>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <applicationService serviceImplementation="com.xiaokeer.idea.psi.mcp.IdeaPsiHttpService"/>
+    <postStartupActivity implementation="com.xiaokeer.idea.psi.mcp.IdeaPsiProjectActivity"/>
+  </extensions>
+</idea-plugin>
+

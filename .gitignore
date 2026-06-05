@@ -1,0 +1,9 @@
+node_modules/
+mcp-server/node_modules/
+mcp-server/dist/
+plugin/.gradle/
+plugin/.intellijPlatform/
+plugin/build/
+.idea/
+.xiaokeer/
+*.log

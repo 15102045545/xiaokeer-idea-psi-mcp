@@ -1,0 +1,14 @@
+{
+  "name": "xiaokeer-idea-psi-mcp-root",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "mcp:typecheck": "pnpm --dir mcp-server typecheck",
+    "mcp:build": "pnpm --dir mcp-server build",
+    "mcp:smoke": "pnpm --dir mcp-server mcp:smoke",
+    "plugin:build": "cd plugin && ./gradlew buildPlugin",
+    "doctor": "node scripts/runtime.mjs doctor"
+  }
+}
+
