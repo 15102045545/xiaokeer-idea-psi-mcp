@@ -4,7 +4,7 @@ This file is the root instruction layer for agents working inside `xiaokeer-idea
 
 ## Core Mental Model
 
-`xiaokeer-idea-psi-mcp` is an external read-only IntelliJ IDEA PSI harness for local Codex work. It is infrastructure, not `petaskApp` business code.
+`xiaokeer-idea-psi-mcp` is an external read-only IntelliJ IDEA PSI harness for local Codex work. It is infrastructure, not application business code.
 
 The project has two cooperating layers:
 
@@ -29,7 +29,7 @@ Generated directories such as `node_modules/`, `mcp-server/dist/`, `plugin/build
 
 ## Editing Rules
 
-- Keep source in this independent project. Do not copy implementation into `petaskApp` or `petask-code-intel-mcp`.
+- Keep source in this independent project. Do not copy implementation into application repositories or unrelated MCP harnesses.
 - Do not manually merge lockfiles. If dependency changes affect `pnpm-lock.yaml`, regenerate it with pnpm.
 - Do not add `.env.example`. Durable configuration belongs in source defaults, scripts, or the single local `.env` mechanism if one is introduced.
 - Do not add compatibility shims, temporary environment switches, or semantic fallback paths that weaken the read-only PSI contract.
@@ -40,7 +40,7 @@ Generated directories such as `node_modules/`, `mcp-server/dist/`, `plugin/build
 
 - Use `rg` and `rg --files` for repository search.
 - Exclude `node_modules`, `mcp-server/dist`, `plugin/build`, `.gradle`, and any `.xiaokeer` scratch directory from ordinary searches.
-- Runtime state belongs under the user-local runtime directory, not in `petaskApp`.
+- Runtime state belongs under the user-local runtime directory, not in application repositories.
 
 ## Validation Matrix
 
@@ -49,10 +49,10 @@ Use the smallest validation that covers the changed surface:
 | Changed surface | Minimum validation |
 | --- | --- |
 | Documentation only | Read Markdown for fact drift and duplication. |
-| MCP schema, contract, client, or server code | `pnpm --dir mcp-server typecheck` and `pnpm --dir mcp-server mcp:smoke` |
+| MCP schema, contract, client, or server code | `pnpm --dir mcp-server typecheck` and `pnpm --dir mcp-server mcp:smoke -- --project-path "<open IDEA project>" --query "<real TS/JS symbol>"` |
 | Runtime registration or wrapper scripts | `pnpm --dir mcp-server typecheck`, then `node scripts/runtime.mjs doctor` |
 | IDEA plugin Kotlin code, plugin XML, or Gradle config | `cd plugin && ./gradlew buildPlugin` |
-| Full harness behavior | Plugin running in IDEA, runtime manifest present, then `pnpm --dir mcp-server cli health` and the `getHealthSummaryPlugin` smoke calls |
+| Full harness behavior | Plugin running in IDEA, runtime manifest present, then `pnpm --dir mcp-server cli health` and live smoke calls against an open IDEA project |
 
 ## Public Contract Coupling
 
@@ -64,4 +64,3 @@ When tool names, annotations, error codes, or output envelopes change, update th
 - `plugin/src/main/kotlin/com/xiaokeer/idea/psi/mcp/PsiQueryService.kt`
 - `README.md`
 - relevant smoke or CLI checks
-

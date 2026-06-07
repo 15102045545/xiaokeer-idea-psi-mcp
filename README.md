@@ -2,7 +2,17 @@
 
 `xiaokeer-idea-psi-mcp` is a local, read-only IntelliJ IDEA PSI harness for Codex. It exposes structured MCP tools that query IntelliJ IDEA's live project PSI model for TypeScript and JavaScript symbol resolution, usages, and symbol search.
 
-The implementation is intentionally independent from `petaskApp` and `petask-code-intel-mcp`.
+The implementation is intentionally independent from any application repository. It is infrastructure for local coding agents that need IDE-grade TypeScript and JavaScript semantics.
+
+For a complete agent-facing installation runbook, see [`CODEX_GO.md`](./CODEX_GO.md).
+
+## Status
+
+- License: MIT.
+- Transport: local stdio MCP server.
+- IDE bridge: token-authenticated loopback HTTP service bound to `127.0.0.1`.
+- IDEA target: IntelliJ IDEA Ultimate `2026.1.x` with the bundled JavaScript plugin.
+- Tool scope: read-only TypeScript and JavaScript PSI queries.
 
 ## Architecture
 
@@ -24,6 +34,7 @@ The MCP server owns the public MCP contract. The IDEA plugin owns semantic autho
 | `mcp-server/` | TypeScript MCP stdio server, plugin HTTP client, CLI, and smoke checks. |
 | `scripts/runtime.mjs` | Local Codex registration and diagnostics helper. |
 | `docs/` | Focused operating notes. |
+| `CODEX_GO.md` | Agent-facing from-zero-to-healthy Codex installation guide. |
 
 ## Tool Surface
 
@@ -41,7 +52,7 @@ All successful and failed tool executions return a structured envelope:
 {
   "ok": true,
   "tool": "psi_search_symbol",
-  "projectPath": "/Users/chongwen002/project/petaskApp",
+  "projectPath": "/absolute/path/to/project",
   "sourceState": "ideCommittedPsi",
   "data": {},
   "diagnostics": []
@@ -96,10 +107,10 @@ pnpm --dir mcp-server cli health
 pnpm --dir mcp-server cli projects
 ```
 
-Run the live MCP smoke after IntelliJ IDEA has loaded the plugin and opened `petaskApp`:
+Run the live MCP smoke after IntelliJ IDEA has loaded the plugin and opened a TypeScript or JavaScript project:
 
 ```bash
-pnpm --dir mcp-server mcp:smoke
+pnpm --dir mcp-server mcp:smoke -- --project-path "/absolute/path/to/project" --query "ExistingSymbolName"
 ```
 
 Register the MCP server with local Codex:
@@ -128,27 +139,31 @@ and upserts this Codex block:
 
 ```toml
 [mcp_servers.xiaokeer-idea-psi]
-command = "/Users/chongwen002/.codex/bin/xiaokeer-idea-psi-mcp.sh"
+command = "/Users/<you>/.codex/bin/xiaokeer-idea-psi-mcp.sh"
 ```
 
 The wrapper starts the stdio MCP server directly. The IDEA plugin must already be installed or running in a development IDE for `psi_*` tools to return semantic results.
 
-## Smoke Target
+After changing Codex MCP configuration, open a new Codex session or restart the Codex client before validating tool availability.
 
-The first validation project is:
+## Smoke Expectations
 
-```text
-/Users/chongwen002/project/petaskApp
-```
+Choose a stable TypeScript or JavaScript symbol from a project currently open in IntelliJ IDEA, then run the smoke with that project path and symbol name.
 
-Smoke symbol:
+Expected IDEA PSI behavior:
 
-```text
-getHealthSummaryPlugin
-```
+- `psi_search_symbol` returns a match for the requested symbol.
+- `psi_resolve_symbol` resolves a usage to its declaration target.
+- `psi_find_usages` includes the declaration and real reference locations.
 
-Expected IDEA PSI results:
+## Limitations
 
-- `psi_search_symbol` returns a match with `name: "getHealthSummaryPlugin"` for the exported function in `apps/server/src/modules/aiAgentTools/controllers/aiAgentTools.controller.ts`.
-- `psi_resolve_symbol` resolves the route handler usage in `apps/server/src/modules/aiAgentTools/routes/index.ts`.
-- `psi_find_usages` includes the controller definition, route import, and route handler argument usage.
+- The tool surface is read-only.
+- The plugin must be installed or running in IntelliJ IDEA, and the target project must be open in IDEA.
+- Position arguments use 1-based UTF-16 line and column numbers.
+- Successful semantic results come from IDEA committed PSI. The MCP server does not fall back to text search when PSI cannot answer.
+- stdout from the stdio MCP process is reserved for MCP protocol traffic. Diagnostics belong in structured tool results, CLI output, stderr, or logs.
+
+## License
+
+MIT. See [`LICENSE`](./LICENSE).

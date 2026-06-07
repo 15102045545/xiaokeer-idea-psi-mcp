@@ -2,6 +2,7 @@
   "name": "xiaokeer-idea-psi-mcp-root",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "mcp:typecheck": "pnpm --dir mcp-server typecheck",
@@ -11,4 +12,3 @@
     "doctor": "node scripts/runtime.mjs doctor"
   }
 }
-

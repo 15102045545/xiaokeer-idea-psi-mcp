@@ -8,7 +8,7 @@ The MCP server is a stdio process. It reads the manifest for each tool call, val
 
 ## Required IDEA State
 
-`petaskApp` must be open in IntelliJ IDEA. The plugin validates `projectPath` against the open project roots and does not infer a project from `filePath`.
+A TypeScript or JavaScript project must be open in IntelliJ IDEA. The plugin validates `projectPath` against the open project roots and does not infer a project from `filePath`.
 
 The `psi_*` tools require Smart Mode. If IDEA is indexing and the caller does not wait long enough, the plugin returns `index_not_ready`.
 

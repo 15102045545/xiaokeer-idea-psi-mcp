@@ -2,10 +2,11 @@
 import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
+import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const toolRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const home = process.env.HOME ?? '/Users/chongwen002';
+const home = process.env.HOME ?? homedir();
 const codexConfigPath = join(home, '.codex', 'config.toml');
 const codexBinDir = join(home, '.codex', 'bin');
 const wrapperPath = join(codexBinDir, 'xiaokeer-idea-psi-mcp.sh');
@@ -19,15 +20,40 @@ const installedPluginDir = join(ideaPluginsDir, 'xiaokeer-idea-psi-mcp-plugin');
 const configHeader = '[mcp_servers.xiaokeer-idea-psi]';
 const configBlock = `${configHeader}\ncommand = "${wrapperPath}"`;
 
+function resolvePnpmBin() {
+  const explicit = process.env.XIAOKEER_IDEA_PSI_PNPM_BIN;
+  if (explicit) return explicit;
+
+  try {
+    const found = execFileSync('/usr/bin/env', ['which', 'pnpm'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    if (found) return found;
+  } catch {
+    // Fall through to common macOS locations.
+  }
+
+  for (const candidate of ['/opt/homebrew/bin/pnpm', '/usr/local/bin/pnpm']) {
+    if (existsSync(candidate)) return candidate;
+  }
+
+  return null;
+}
+
 function ensureDirs() {
   mkdirSync(dirname(codexConfigPath), { recursive: true });
   mkdirSync(codexBinDir, { recursive: true });
 }
 
 function wrapperScript() {
+  const pnpmBin = resolvePnpmBin();
+  if (!pnpmBin) {
+    throw new Error('pnpm_not_found: install pnpm or set XIAOKEER_IDEA_PSI_PNPM_BIN to an absolute pnpm path.');
+  }
   return `#!/usr/bin/env bash
 set -euo pipefail
-exec /opt/homebrew/bin/pnpm --dir "${mcpServerDir}" exec tsx src/mcp.ts
+exec "${pnpmBin}" --dir "${mcpServerDir}" exec tsx src/mcp.ts
 `;
 }
 

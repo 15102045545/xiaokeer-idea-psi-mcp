@@ -43,7 +43,10 @@ async function runSmoke() {
   const argv = process.argv.slice(2);
   const timeoutMs = numberOption(argv, 'timeout-ms') ?? DEFAULT_TIMEOUT_MS;
   const serverScript = stringOption(argv, 'server-script') ?? 'src/mcp.ts';
-  const projectPath = stringOption(argv, 'project-path') ?? '/Users/chongwen002/project/petaskApp';
+  const projectPath = stringOption(argv, 'project-path') ?? process.env.XIAOKEER_IDEA_PSI_SMOKE_PROJECT_PATH;
+  const query = stringOption(argv, 'query') ?? process.env.XIAOKEER_IDEA_PSI_SMOKE_QUERY;
+  if (!projectPath) throw new Error('Missing --project-path or XIAOKEER_IDEA_PSI_SMOKE_PROJECT_PATH.');
+  if (!query) throw new Error('Missing --query or XIAOKEER_IDEA_PSI_SMOKE_QUERY.');
 
   const transport = new StdioClientTransport({
     command: 'pnpm',
@@ -79,7 +82,7 @@ async function runSmoke() {
         name: 'psi_search_symbol',
         arguments: {
           projectPath,
-          query: 'getHealthSummaryPlugin',
+          query,
           limit: 5,
           waitForSmartModeMs: 0,
         },
@@ -104,10 +107,10 @@ async function runSmoke() {
     const hasExpectedMatch = matches.some((match) => {
       if (!match || typeof match !== 'object') return false;
       const record = match as Record<string, unknown>;
-      return record.name === 'getHealthSummaryPlugin' || record.symbolName === 'getHealthSummaryPlugin';
+      return record.name === query || record.symbolName === query;
     });
     if (!hasExpectedMatch) {
-      throw new Error('psi_search_symbol smoke did not return getHealthSummaryPlugin.');
+      throw new Error(`psi_search_symbol smoke did not return ${query}.`);
     }
 
     process.stdout.write(
